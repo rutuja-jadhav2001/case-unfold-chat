@@ -2,6 +2,7 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import { defineConfig } from "vite";
 import { nitro } from "nitro/vite";
 import viteReact from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   resolve: {
@@ -10,5 +11,5 @@ export default defineConfig({
   build: {
     cssMinify: "esbuild",
   },
-  plugins: [tanstackStart(), nitro(), viteReact()],
+  plugins: [tailwindcss(), tanstackStart(), nitro(), viteReact()],
 });
