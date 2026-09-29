@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AlertTriangle, Camera, Download, Mic, MicOff, Play, RotateCcw, Send, Square } from 'lucide-react';
 import { AppHeader, PageShell } from '@/components/AppHeader';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
 import { askProbe } from '@/lib/probe.functions';
 import { extractText } from '@/lib/extract-text';
 import { countFaces } from '@/lib/face-watch';
