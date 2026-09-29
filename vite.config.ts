@@ -7,5 +7,8 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
+  build: {
+    cssMinify: "esbuild",
+  },
   plugins: [tanstackStart(), nitro(), viteReact()],
 });
