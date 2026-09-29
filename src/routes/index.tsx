@@ -6,16 +6,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "CTC Bot — Critical Thinking Chat Bot for case studies" },
-      {
-        name: "description",
-        content:
-          "Upload a case study and answer five spoken questions in a proctored session. CTC Bot tests assumptions, evidence and counterarguments, and never gives the answer.",
-      },
+      { name: "description", content: "Upload a case study and answer five spoken questions in a proctored session." },
       { property: "og:title", content: "CTC Bot — Critical Thinking Chat Bot" },
-      {
-        property: "og:description",
-        content: "Proctored, spoken case practice: five precise questions on your case. No answers given.",
-      },
+      { property: "og:description", content: "Proctored, spoken case practice: five precise questions on your case." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -38,7 +31,7 @@ function Index() {
         right={
           !user && (
             <Link to="/auth" className="rounded-full bg-primary px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-primary-foreground">
-              Sign in
+              Demo sign in
             </Link>
           )
         }
@@ -56,7 +49,7 @@ function Index() {
           to={user ? "/session" : "/auth"}
           className="mt-8 inline-block rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground"
         >
-          {user ? "Start a session" : "Sign in to begin"}
+          {user ? "Start a session" : "Demo sign in to begin"}
         </Link>
       </section>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
