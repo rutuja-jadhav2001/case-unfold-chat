@@ -62,16 +62,14 @@ function SessionPage() {
     const entry = { type, detail, offset_seconds: Math.floor((Date.now() - started.current) / 1000) };
     flagsRef.current = [...flagsRef.current, entry];
     setFlags(flagsRef.current);
-    const { error } = await supabase.from('session_flags').insert({ session_id: id, ...entry });
-    if (error) setError(`Warning could not be saved: ${error.message}`);
-    else await supabase.from('sessions').update({ flag_count: flagsRef.current.length }).eq('id', id);
+    // Demo mode: warnings are kept in local state instead of requiring authentication.
+
   }, []);
   const storeTurn = async (turn: Turn) => {
     const id = sessionIdRef.current;
     const idx = turnsRef.current.length;
     if (!id) throw new Error('Session was not started.');
-    const { error } = await supabase.from('session_turns').insert({ session_id: id, idx, ...turn });
-    if (error) throw error;
+    // Demo mode: transcript turns are kept locally.
     turnsRef.current = [...turnsRef.current, turn];
     setTurns(turnsRef.current);
   };
@@ -157,12 +155,9 @@ function SessionPage() {
     if (!media.current?.healthy || busyRef.current) return;
     setBusyState(true); setError('');
     try {
-      const { data: auth } = await supabase.auth.getUser();
-      if (!auth.user) throw new Error('Sign in again to begin.');
-      const { data, error } = await supabase.from('sessions').insert({ student_id: auth.user.id, case_name: fileName, case_text: caseText }).select('id').single();
-      if (error || !data) throw error ?? new Error('Could not create session.');
+      const demoSessionId = crypto.randomUUID();
       media.current.start();
-      started.current = Date.now(); sessionIdRef.current = data.id; setSessionId(data.id);
+      started.current = Date.now(); sessionIdRef.current = demoSessionId; setSessionId(demoSessionId);
       setPhase('session'); setStatus('Preparing the first question…');
       setBusyState(false);
       await nextQuestion([], 1);
@@ -211,15 +206,9 @@ function SessionPage() {
   async function finish() {
     setStatus('Saving session recording…');
     const blob = await media.current?.stop();
-    const { data: auth } = await supabase.auth.getUser();
-    if (!blob?.size || !auth.user || !sessionIdRef.current) { setError('The recording could not be saved. Keep this page open and try again.'); return; }
-    const extension = blob.type.includes('mp4') ? 'mp4' : 'webm';
-    const path = `${auth.user.id}/${sessionIdRef.current}.${extension}`;
-    const { error: uploadError } = await supabase.storage.from('recordings').upload(path, blob, { contentType: blob.type, upsert: false });
-    if (uploadError) { setError(`Recording upload failed: ${uploadError.message}. Keep this page open and retry.`); setStatus('Recording not saved'); return; }
-    const { error: updateError } = await supabase.from('sessions').update({ status: 'completed', ended_at: new Date().toISOString(), recording_path: path, flag_count: flagsRef.current.length }).eq('id', sessionIdRef.current);
-    if (updateError) { setError(`Session status could not be saved: ${updateError.message}`); return; }
-    setPhase('finished'); setStatus('Session complete and saved.');
+    if (!blob?.size || !sessionIdRef.current) { setError('The recording could not be saved. Keep this page open and try again.'); return; }
+    // Demo mode: recording/transcript remain in the browser for this session.
+    setPhase('finished'); setStatus('Session complete. Demo recording is available for this session.');
     await media.current?.dispose(); media.current = null;
   }
   function download() {
