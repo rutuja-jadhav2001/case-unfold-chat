@@ -1,36 +1,37 @@
 import { useEffect, useState } from "react";
-import type { User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+
+export type DemoUser = {
+  id: string;
+  email: string;
+  user_metadata: { full_name: string };
+};
+
+const DEMO_KEY = "ctc-demo-user";
+
+function readDemoUser(): DemoUser | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(DEMO_KEY);
+    return raw ? (JSON.parse(raw) as DemoUser) : null;
+  } catch {
+    return null;
+  }
+}
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [isInstructor, setIsInstructor] = useState(false);
+  const [user, setUser] = useState<DemoUser | null>(readDemoUser);
+  const [loading, setLoading] = useState(false);
+  const [isInstructor] = useState(false);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      setUser(session?.user ?? null);
-    });
-    supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null);
-      setLoading(false);
-    });
-    return () => sub.subscription.unsubscribe();
+    const sync = () => setUser(readDemoUser());
+    window.addEventListener("storage", sync);
+    window.addEventListener("ctc-demo-auth", sync);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener("ctc-demo-auth", sync);
+    };
   }, []);
-
-  useEffect(() => {
-    if (!user) {
-      setIsInstructor(false);
-      return;
-    }
-    supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "instructor")
-      .maybeSingle()
-      .then(({ data }) => setIsInstructor(!!data));
-  }, [user]);
 
   return { user, loading, isInstructor };
 }
