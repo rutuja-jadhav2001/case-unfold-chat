@@ -1,5 +1,4 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 export function AppHeader({ right }: { right?: React.ReactNode }) {
@@ -40,8 +39,9 @@ export function AppHeader({ right }: { right?: React.ReactNode }) {
             )}
             <button
               type="button"
-              onClick={async () => {
-                await supabase.auth.signOut();
+              onClick={() => {
+                localStorage.removeItem("ctc-demo-user");
+                window.dispatchEvent(new Event("ctc-demo-auth"));
                 navigate({ to: "/auth" });
               }}
               className="rounded-full px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground"
